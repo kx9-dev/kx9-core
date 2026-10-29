@@ -69,6 +69,6 @@
     "@types/node": "25.9.9",
     "esbuild": "0.28.2",
     "@types/pg": "8.23.1",
-    "typescript": "5.9.3"
+    "typescript": "7.0.2"
   }
 }
