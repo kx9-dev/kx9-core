@@ -1,0 +1,74 @@
+{
+  "name": "@kx9-dev/core",
+  "version": "0.1.0",
+  "description": "Wallet-authenticated Core API, deterministic trading rules, risk checks and mainnet execution controls.",
+  "type": "module",
+  "license": "MIT",
+  "author": "KX-9 contributors <dev@kx9.tech>",
+  "homepage": "https://github.com/kx9-dev/kx9-docs",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kx9-dev/kx9-core.git"
+  },
+  "bugs": {
+    "url": "https://github.com/kx9-dev/kx9-core/issues"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "kx9",
+    "typescript",
+    "defi",
+    "risk-management",
+    "backend"
+  ],
+  "files": [
+    "src",
+    "dist",
+    "build.mjs",
+    "schema.sql",
+    "scripts",
+    "openapi.yaml",
+    "tsconfig.json",
+    ".env.example",
+    "vendor-licenses",
+    "README.md",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "scripts": {
+    "dev": "node --env-file-if-exists=.env build.mjs && node --env-file-if-exists=.env dist/index.mjs",
+    "build": "node build.mjs",
+    "start": "node --env-file-if-exists=.env dist/index.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test src/lib/mainnet-rpc.test.mjs",
+    "test:integration": "node --test tests/core.integration.test.mjs",
+    "db:init": "node --env-file-if-exists=.env scripts/init-db.mjs"
+  },
+  "dependencies": {
+    "cookie-parser": "1.4.7",
+    "cors": "2.8.6",
+    "drizzle-orm": "0.45.4",
+    "ethers": "6.17.0",
+    "express": "5.3.0",
+    "pino": "9.14.0",
+    "pino-http": "10.5.0",
+    "drizzle-zod": "0.8.3",
+    "pg": "8.23.1",
+    "zod": "4.6.6",
+    "pino-pretty": "13.2.0"
+  },
+  "devDependencies": {
+    "@types/cookie-parser": "1.4.10",
+    "@types/cors": "2.8.19",
+    "@types/express": "5.0.6",
+    "@types/node": "25.9.9",
+    "esbuild": "0.28.2",
+    "@types/pg": "8.23.1",
+    "typescript": "5.9.3"
+  }
+}

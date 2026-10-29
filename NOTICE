@@ -1,0 +1,1 @@
+KX-9 source is MIT-licensed. Third-party dependencies, fonts and external libraries retain their original licenses. The web app loads ethers, Three.js and Google Fonts from their providers; they are not relicensed. Dependency license texts are included where bundled in release packages.

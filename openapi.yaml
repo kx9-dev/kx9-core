@@ -1,0 +1,414 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: KX-9 Core API
+  version: 0.1.0
+  description: API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+paths:
+  /v1/health:
+    get:
+      operationId: getCoreHealth
+      responses:
+        "200": &coreResponse
+          description: Live-only KX-9 Core data
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/CoreData"}
+  /v1/config:
+    get:
+      operationId: getCoreConfig
+      responses: {"200": *coreResponse}
+  /v1/prices:
+    get:
+      operationId: getCorePrices
+      responses: {"200": *coreResponse}
+  /v1/auth/nonce:
+    post:
+      operationId: createCoreChallenge
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: "#/components/schemas/WalletChallenge"}
+      responses: {"200": *coreResponse}
+  /v1/auth/verify:
+    post:
+      operationId: verifyCoreWallet
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: "#/components/schemas/WalletSignature"}
+      responses: {"200": *coreResponse}
+  /v1/auth/session:
+    get:
+      operationId: getCoreSession
+      responses: {"200": *coreResponse}
+  /v1/auth/logout:
+    post:
+      operationId: logoutCoreWallet
+      responses: {"200": *coreResponse}
+  /v1/settings/protocols:
+    get:
+      operationId: getCoreProtocolSettings
+      responses: {"200": *coreResponse}
+    put:
+      operationId: saveCoreProtocols
+      requestBody: &protocolBody
+        required: true
+        content:
+          application/json:
+            schema: {$ref: "#/components/schemas/CoreProtocols"}
+      responses: {"200": *coreResponse}
+  /v1/units:
+    get:
+      operationId: getCoreUnits
+      responses: {"200": *coreResponse}
+  /v1/units/{id}:
+    parameters: &unitParam
+      - {name: id, in: path, required: true, schema: {type: integer, minimum: 0}}
+    get:
+      operationId: getCoreUnit
+      responses: {"200": *coreResponse}
+  /v1/units/{id}/state:
+    parameters: *unitParam
+    get:
+      operationId: getCoreUnitState
+      responses: {"200": *coreResponse}
+  /v1/units/{id}/telemetry:
+    parameters: *unitParam
+    get:
+      operationId: getCoreTelemetry
+      responses: {"200": *coreResponse}
+  /v1/units/{id}/mode:
+    parameters: *unitParam
+    patch:
+      operationId: changeCoreMode
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: "#/components/schemas/CoreModeChange"}
+      responses: {"200": *coreResponse}
+  /v1/units/{id}/diagnostic:
+    parameters: *unitParam
+    post:
+      operationId: runCoreDiagnostic
+      responses: {"200": *coreResponse}
+  /v1/units/{id}/protocols:
+    parameters: *unitParam
+    get:
+      operationId: getCoreUnitProtocols
+      responses: {"200": *coreResponse}
+    put:
+      operationId: saveCoreUnitProtocols
+      requestBody: *protocolBody
+      responses: {"200": *coreResponse}
+  /v1/units/{id}/shield:
+    parameters: *unitParam
+    get:
+      operationId: getCoreShield
+      responses: {"200": *coreResponse}
+    put:
+      operationId: confirmCoreShield
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: "#/components/schemas/CoreShieldConfirmation"}
+      responses: {"200": *coreResponse}
+  /v1/units/{id}/shield/prepare:
+    parameters: *unitParam
+    post:
+      operationId: prepareCoreShield
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: "#/components/schemas/CoreLimits"}
+      responses: {"200": *coreResponse}
+  /v1/units/{id}/proposals:
+    parameters: *unitParam
+    get:
+      operationId: getCoreProposals
+      responses: {"200": *coreResponse}
+  /v1/proposals/{id}/approve:
+    parameters: &proposalParam
+      - {name: id, in: path, required: true, schema: {type: string, maxLength: 80}}
+    post:
+      operationId: approveCoreProposal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: "#/components/schemas/TransactionConfirmation"}
+      responses: {"200": *coreResponse}
+  /v1/proposals/{id}/reject:
+    parameters: *proposalParam
+    post:
+      operationId: rejectCoreProposal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: "#/components/schemas/ProposalRejection"}
+      responses: {"200": *coreResponse}
+  /v1/units/{id}/blackbox:
+    parameters: *unitParam
+    get:
+      operationId: getCoreBlackBox
+      responses: {"200": *coreResponse}
+  /v1/units/{id}/passport:
+    parameters: *unitParam
+    get:
+      operationId: getCorePassport
+      responses: {"200": *coreResponse}
+  /v1/simulations:
+    post:
+      operationId: runCoreSimulation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: "#/components/schemas/HistoricalReplay"}
+      responses: {"200": *coreResponse}
+  /v1/stream:
+    get:
+      operationId: streamCoreUpdates
+      responses:
+        "200":
+          description: Authenticated server-sent events, with periodic state polling as fallback
+          content:
+            text/event-stream:
+              schema: {type: string}
+  /v1/account:
+    get:
+      operationId: exportCoreAccount
+      responses: {"200": *coreResponse}
+    delete:
+      operationId: deleteCoreAccount
+      responses: {"200": *coreResponse}
+  /rpc/status:
+    get:
+      operationId: getRpcStatus
+      summary: Verify the configured Robinhood mainnet connection
+      responses:
+        "200":
+          description: Mainnet connection verified
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RpcStatus"
+        "503":
+          description: Mainnet connection unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RpcStatus"
+  /rpc:
+    post:
+      operationId: requestRpc
+      summary: Read-only mainnet JSON-RPC through the secret-backed server
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RpcRequest"
+      responses:
+        "200":
+          description: JSON-RPC response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RpcResponse"
+        "400":
+          description: Invalid or unsupported request
+        "429":
+          description: Request limit reached
+        "503":
+          description: Mainnet provider unavailable
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+components:
+  schemas:
+    CoreData:
+      type: object
+      additionalProperties: true
+    WalletChallenge:
+      type: object
+      required: [address, chainId]
+      properties:
+        address: {type: string, pattern: "^0x[0-9a-fA-F]{40}$"}
+        chainId: {type: integer, enum: [4663]}
+    WalletSignature:
+      type: object
+      required: [message, signature]
+      properties:
+        message: {type: string, maxLength: 2000}
+        signature: {type: string, pattern: "^0x[0-9a-fA-F]{130}$"}
+    CoreProtocols:
+      type: object
+      required: [accumulate, balance, guard, trend, physical]
+      additionalProperties: false
+      properties:
+        accumulate:
+          type: object
+          required: [on, asset, amount, every]
+          properties:
+            on: {type: boolean}
+            asset: {$ref: "#/components/schemas/TradingAsset"}
+            amount: {type: number, minimum: 10, maximum: 1000000}
+            every: {$ref: "#/components/schemas/TradingPeriod"}
+        balance:
+          type: object
+          required: [on, target, drift]
+          properties:
+            on: {type: boolean}
+            target: {type: string, enum: ["Growth 60/40", "Balanced 40/60", "Defensive 20/80"]}
+            drift: {type: number, minimum: 1, maximum: 25}
+        guard:
+          type: object
+          required: [on, tp, sl]
+          properties:
+            on: {type: boolean}
+            tp: {type: number, minimum: 1, maximum: 1000}
+            sl: {type: number, minimum: 1, maximum: 100}
+        trend:
+          type: object
+          required: [on, asset, size, window]
+          properties:
+            on: {type: boolean}
+            asset: {$ref: "#/components/schemas/TradingAsset"}
+            size: {type: number, minimum: 10, maximum: 1000000}
+            window: {type: integer, minimum: 5, maximum: 200}
+        physical:
+          type: object
+          required: [on, amount, every, dip, dipAmount]
+          properties:
+            on: {type: boolean}
+            amount: {type: number, minimum: 10, maximum: 1000000}
+            every: {$ref: "#/components/schemas/TradingPeriod"}
+            dip: {type: number, minimum: 1, maximum: 30}
+            dipAmount: {type: number, minimum: 10, maximum: 1000000}
+    TradingAsset: {type: string, enum: [NVDA, TSLA, AAPL, AMZN, PLTR, ETH]}
+    TradingPeriod: {type: string, enum: [Daily, Weekly, Monthly]}
+    CoreLimits:
+      type: object
+      required: [maxTrade, dailyCap, slippage, cooldown, whitelist]
+      properties:
+        maxTrade: {type: number, minimum: 50, maximum: 5000}
+        dailyCap: {type: number, minimum: 100, maximum: 20000}
+        slippage: {type: number, minimum: 0.1, maximum: 3}
+        cooldown: {type: integer, minimum: 0, maximum: 120}
+        whitelist:
+          type: array
+          uniqueItems: true
+          maxItems: 7
+          items: {type: string, enum: [NVDA, TSLA, AAPL, AMZN, PLTR, ETH, USDC]}
+    TransactionConfirmation:
+      type: object
+      required: [txHash]
+      properties:
+        txHash: {type: string, pattern: "^0x[0-9a-fA-F]{64}$"}
+    CoreModeChange:
+      type: object
+      required: [mode, txHash]
+      properties:
+        mode: {type: string, enum: [supervised, autonomous, standby]}
+        txHash: {type: string, pattern: "^0x[0-9a-fA-F]{64}$"}
+    CoreShieldConfirmation:
+      allOf:
+        - {$ref: "#/components/schemas/CoreLimits"}
+        - {$ref: "#/components/schemas/TransactionConfirmation"}
+    ProposalRejection:
+      type: object
+      properties:
+        reason: {type: string, maxLength: 300}
+    HistoricalReplay:
+      type: object
+      required: [protocol, asset, capital, history]
+      properties:
+        protocol: {type: string, enum: [accumulate, balance, guard, trend, physical]}
+        asset: {$ref: "#/components/schemas/TradingAsset"}
+        capital: {type: number, minimum: 100, maximum: 10000000}
+        history:
+          type: array
+          minItems: 2
+          maxItems: 366
+          items:
+            type: object
+            required: [date, close]
+            properties:
+              date: {type: string, pattern: "^\\d{4}-\\d{2}-\\d{2}$"}
+              close: {type: number, exclusiveMinimum: 0, maximum: 10000000}
+    RpcStatus:
+      type: object
+      required: [configured, connected, expectedChainId, chainId, latestBlock, blockTimeUTC, checkedAt, error]
+      properties:
+        configured: {type: boolean}
+        connected: {type: boolean}
+        expectedChainId: {type: integer}
+        chainId: {type: [integer, "null"]}
+        latestBlock: {type: [string, "null"]}
+        blockTimeUTC: {type: [string, "null"]}
+        checkedAt: {type: string}
+        error: {type: [string, "null"]}
+    RpcRequest:
+      type: object
+      additionalProperties: false
+      required: [jsonrpc, id, method]
+      properties:
+        jsonrpc: {type: string, enum: ["2.0"]}
+        id:
+          oneOf:
+            - {type: integer}
+            - {type: string, maxLength: 80}
+        method:
+          type: string
+          enum: [eth_chainId, net_version, eth_blockNumber, eth_getBalance, eth_getCode, eth_call, eth_getTransactionReceipt, eth_getTransactionByHash, eth_gasPrice, eth_maxPriorityFeePerGas]
+        params:
+          type: array
+          maxItems: 3
+          items: {}
+    RpcResponse:
+      type: object
+      required: [jsonrpc, id]
+      properties:
+        jsonrpc: {type: string}
+        id:
+          oneOf:
+            - {type: integer}
+            - {type: string}
+        result: {}
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code: {type: integer}
+            message: {type: string}
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+

@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Private security report
+    url: mailto:dev@kx9.tech
+    about: Never post secrets or exploit details in public issues.
